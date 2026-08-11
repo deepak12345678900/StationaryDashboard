@@ -1,0 +1,501 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --primary: #4478ff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    --danger: #dc2626;
+    --success: #10b981;
+}
+
+body {
+    font-family: Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.brand h1 {
+    font-size: 1.9rem;
+}
+
+.brand p {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.tab-button {
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 999px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+    transition: all 0.15s ease;
+}
+
+.tab-button.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+.form-panel h2,
+.transaction-summary h2,
+.records-panel h2,
+.dashboard-card h3,
+.dashboard-analysis h3,
+.chart-card h3 {
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+}
+
+.transaction-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.form-grid label,
+.split-fields label {
+    display: grid;
+    gap: 8px;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+input,
+select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    font-size: 0.95rem;
+    background: #fafbff;
+    color: var(--text);
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(68, 120, 255, 0.12);
+}
+
+.payment-label {
+    grid-column: span 2;
+}
+
+.split-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 16px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.button-row,
+.records-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.primary-button,
+.secondary-button {
+    border: none;
+    border-radius: 999px;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.2s ease;
+}
+
+.primary-button {
+    background: var(--primary);
+    color: #fff;
+}
+
+.primary-button:hover {
+    background: #3567d4;
+}
+
+.secondary-button {
+    background: #eef2ff;
+    color: var(--text);
+}
+
+.secondary-button:hover {
+    background: #dbe7ff;
+}
+
+.secondary-button.danger {
+    background: #fee2e2;
+    color: var(--danger);
+}
+
+.secondary-button.danger:hover {
+    background: #fecaca;
+}
+
+.info-text {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.transaction-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.95rem;
+}
+
+.items-table-wrapper,
+.records-table-wrapper {
+    overflow-x: auto;
+}
+
+.items-table,
+.records-table,
+.analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.items-table th,
+.items-table td,
+.records-table th,
+.records-table td,
+.analysis-table th,
+.analysis-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.94rem;
+}
+
+.items-table th,
+.records-table th,
+.analysis-table th {
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.items-table tr:hover,
+.records-table tr:hover,
+.analysis-table tr:hover {
+    background: #fafbff;
+}
+
+.empty-row td {
+    text-align: center;
+    color: var(--muted);
+    padding: 28px 16px;
+}
+
+.records-panel {
+    margin-bottom: 24px;
+}
+
+.records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.dashboard-card {
+    text-align: center;
+}
+
+.dashboard-card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.period-select {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 10px 12px;
+    background: #fff;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.dashboard-value {
+    margin-top: 16px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.dashboard-panel {
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr;
+    gap: 18px;
+}
+
+.chart-card {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.chart-placeholder {
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(68,120,255,0.12) 0%, rgba(255,255,255,0.55) 100%);
+    color: var(--muted);
+    text-align: center;
+    padding: 24px;
+}
+
+.period-chart-card {
+    background: #f8fbff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px;
+}
+
+.period-chart-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.chart-period-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    min-height: 220px;
+    padding: 12px 8px 4px;
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(66, 109, 255, 0.12);
+}
+
+.bar-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    min-width: 32px;
+    width: 32px;
+}
+
+.bar-column .bar {
+    width: 100%;
+    background: linear-gradient(180deg, var(--primary) 0%, #2f5ace 100%);
+    border-radius: 16px 16px 0 0;
+    transition: transform 0.2s ease;
+}
+
+.bar-column:hover .bar {
+    transform: translateY(-2px);
+}
+
+.bar-column span {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.bar-amount {
+    margin-top: 4px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+@media (max-width: 980px) {
+    .bar-chart {
+        min-height: 200px;
+        gap: 6px;
+    }
+
+    .bar-column {
+        min-width: 24px;
+        width: 24px;
+    }
+
+    .transaction-grid,
+    .dashboard-panel,
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid,
+    .split-fields {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .container {
+        padding: 16px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tab-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .tab-button {
+        flex: 1 1 48%;
+        min-width: 140px;
+    }
+
+    .card {
+        padding: 18px;
+    }
+
+    .primary-button,
+    .secondary-button {
+        width: 100%;
+    }
+
+    .records-header,
+    .summary-row,
+    .dashboard-card-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dashboard-value {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 12px;
+    }
+
+    .brand h1 {
+        font-size: 1.5rem;
+    }
+
+    .form-panel h2,
+    .transaction-summary h2,
+    .records-panel h2,
+    .dashboard-card h3,
+    .dashboard-analysis h3,
+    .chart-card h3 {
+        font-size: 1rem;
+    }
+
+    .tab-button {
+        flex: 1 1 100%;
+    }
+
+    .items-table th,
+    .items-table td,
+    .records-table th,
+    .records-table td,
+    .analysis-table th,
+    .analysis-table td {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .bar-column {
+        min-width: 18px;
+        width: 18px;
+    }
+
+    .bar-column span {
+        font-size: 0.65rem;
+    }
+}

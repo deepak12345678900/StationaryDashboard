@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anandham Stationary Stores</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="brand">
+                <h1>Anandham Stationary Stores</h1>
+                <p>Track products, payments, and sales with live analysis.</p>
+            </div>
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="transactions-tab">Transactions</button>
+                <button class="tab-button" data-tab="dashboard-tab">Dashboard</button>
+            </div>
+        </header>
+
+        <main>
+            <section id="transactions-tab" class="tab-content active">
+                <div class="transaction-grid">
+                    <div class="card form-panel">
+                        <h2>Enter product details</h2>
+                        <div class="form-grid">
+                            <label>
+                                Product name
+                                <input type="text" id="product-name" placeholder="e.g. A4 Notebook">
+                            </label>
+                            <label>
+                                Price
+                                <input type="number" id="product-price" min="0" step="0.01" placeholder="0.00">
+                            </label>
+                            <label>
+                                Quantity
+                                <input type="number" id="product-quantity" min="1" value="1">
+                            </label>
+                            <label class="payment-label">
+                                Payment method
+                                <select id="payment-method">
+                                    <option value="cash">Cash</option>
+                                    <option value="gpay">GPay</option>
+                                    <option value="split">Split payment</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div id="split-payment-fields" class="split-fields hidden">
+                            <label>
+                                Cash amount
+                                <input type="number" id="split-cash" min="0" step="0.01" placeholder="0.00">
+                            </label>
+                            <label>
+                                GPay amount
+                                <input type="number" id="split-gpay" min="0" step="0.01" placeholder="0.00">
+                            </label>
+                        </div>
+
+                        <div class="button-row">
+                            <button id="add-item-button" class="secondary-button">Add item</button>
+                            <button id="save-transaction-button" class="primary-button">Add record</button>
+                        </div>
+
+                        <div class="info-text">
+                            Use the form to add one or more items, then click Add record to save the transaction.
+                        </div>
+                    </div>
+
+                    <div class="card transaction-summary">
+                        <h2>Current transaction</h2>
+                        <div class="summary-row">
+                            <div><strong>Items:</strong> <span id="item-count">0</span></div>
+                            <div><strong>Total:</strong> <span id="transaction-total">₹0.00</span></div>
+                        </div>
+                        <div class="items-table-wrapper">
+                            <table class="items-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="current-items-body">
+                                    <tr class="empty-row"><td colspan="5">No items added yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card records-panel">
+                    <div class="records-header">
+                        <h2>Saved records</h2>
+                        <div class="records-actions">
+                            <button id="export-csv-button" class="secondary-button">Download CSV</button>
+                            <button id="clear-records-button" class="secondary-button danger">Clear all</button>
+                        </div>
+                    </div>
+                    <div class="records-table-wrapper">
+                        <table class="records-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Cash</th>
+                                    <th>GPay</th>
+                                </tr>
+                            </thead>
+                            <tbody id="records-body">
+                                <tr class="empty-row"><td colspan="6">No records available yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dashboard-tab" class="tab-content hidden">
+                <div class="dashboard-cards">
+                    <div class="card dashboard-card">
+                        <h3>Today's revenue</h3>
+                        <div class="dashboard-value" id="today-revenue">₹0.00</div>
+                    </div>
+                    <div class="card dashboard-card">
+                        <div class="dashboard-card-heading">
+                            <h3>Period report</h3>
+                            <select id="period-select" class="period-select">
+                                <option value="weekly">Last 7 days</option>
+                                <option value="monthly">Last 30 days</option>
+                            </select>
+                        </div>
+                        <div class="dashboard-value" id="period-revenue">₹0.00</div>
+                    </div>
+                    <div class="card dashboard-card">
+                        <h3>Transactions today</h3>
+                        <div class="dashboard-value" id="today-count">0</div>
+                    </div>
+                    <div class="card dashboard-card">
+                        <h3>Split payments</h3>
+                        <div class="dashboard-value" id="split-count">0</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-panel">
+                    <div class="card dashboard-analysis">
+                        <h3>Recent transactions</h3>
+                        <table class="analysis-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Method</th>
+                                    <th>Items</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analysis-body">
+                                <tr class="empty-row"><td colspan="4">No records available yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card chart-card">
+                        <h3>Payment split</h3>
+                        <div class="chart-placeholder" id="payment-breakdown">Cash / GPay totals are calculated live.</div>
+                        <div class="period-chart-card">
+                            <div class="period-chart-header">
+                                <h3>Daily sales</h3>
+                                <span class="chart-period-label">Last 7 or 30 days report</span>
+                            </div>
+                            <div id="period-chart" class="bar-chart"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
