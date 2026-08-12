@@ -14,8 +14,14 @@
                 <p>Track products, payments, and sales with live analysis.</p>
             </div>
             <div class="tab-buttons">
-                <button class="tab-button active" data-tab="transactions-tab">Transactions</button>
-                <button class="tab-button" data-tab="dashboard-tab">Dashboard</button>
+                <button type="button" class="tab-button active" data-tab="transactions-tab" onclick="switchTab(event)">Transactions</button>
+                <button type="button" class="tab-button" data-tab="dashboard-tab" onclick="switchTab(event)">Dashboard</button>
+            </div>
+            <button id="theme-toggle-btn" class="theme-toggle-button" aria-label="Toggle dark mode">🌙</button>
+            <div class="user-area">
+                <input id="user-name" placeholder="Your name" aria-label="Your name">
+                <div class="presence"><strong>Active:</strong> <span id="active-users">—</span></div>
+                <div class="firebase-status"><strong>Firebase:</strong> <span id="firebase-status">Checking…</span></div>
             </div>
         </header>
 
@@ -121,11 +127,14 @@
                 </div>
             </section>
 
-            <section id="dashboard-tab" class="tab-content hidden">
+            <section id="dashboard-tab" class="tab-content">
                 <div class="dashboard-cards">
                     <div class="card dashboard-card">
-                        <h3>Today's revenue</h3>
-                        <div class="dashboard-value" id="today-revenue">₹0.00</div>
+                        <div class="today-card-inner"> 
+                            <h3>Today's revenue</h3>
+                            <div class="dashboard-value" id="today-revenue">₹0.00</div>
+                            <div id="today-sparkline" class="today-sparkline" aria-hidden="true"></div>
+                        </div>
                     </div>
                     <div class="card dashboard-card">
                         <div class="dashboard-card-heading">
@@ -145,9 +154,30 @@
                         <h3>Split payments</h3>
                         <div class="dashboard-value" id="split-count">0</div>
                     </div>
+                    <div class="card dashboard-card">
+                        <h3>Payment totals</h3>
+                        <div class="dashboard-value" id="payment-breakdown">Cash collected: ₹0.00 · GPay collected: ₹0.00</div>
+                    </div>
                 </div>
 
                 <div class="dashboard-panel">
+                    <div class="card chart-card chart-card--wide">
+                        <h3>Daily sales overview</h3>
+                        <div class="period-chart-card">
+                            <div class="period-chart-header">
+                                <div>
+                                    <h3>Daily sales</h3>
+                                    <span class="chart-period-label">Last 7 or 30 days report</span>
+                                </div>
+                                <div class="chart-legend">
+                                    <div class="legend-item"><span class="legend-swatch legend-sales"></span>Daily sales</div>
+                                    <div class="legend-item"><span class="legend-swatch legend-today"></span>Today</div>
+                                </div>
+                            </div>
+                            <div id="chart-tooltip" class="chart-tooltip hidden" aria-hidden="true"></div>
+                            <div id="period-chart" class="bar-chart"></div>
+                        </div>
+                    </div>
                     <div class="card dashboard-analysis">
                         <h3>Recent transactions</h3>
                         <table class="analysis-table">
@@ -164,22 +194,15 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="card chart-card">
-                        <h3>Payment split</h3>
-                        <div class="chart-placeholder" id="payment-breakdown">Cash / GPay totals are calculated live.</div>
-                        <div class="period-chart-card">
-                            <div class="period-chart-header">
-                                <h3>Daily sales</h3>
-                                <span class="chart-period-label">Last 7 or 30 days report</span>
-                            </div>
-                            <div id="period-chart" class="bar-chart"></div>
-                        </div>
-                    </div>
                 </div>
             </section>
         </main>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

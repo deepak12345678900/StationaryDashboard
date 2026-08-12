@@ -16,6 +16,18 @@
     --success: #10b981;
 }
 
+body.dark-mode {
+    --bg: #0d1117;
+    --card: #141b22;
+    --primary: #58a6ff;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --border: #30363d;
+    --shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    --danger: #f85149;
+    --success: #56d364;
+}
+
 body {
     font-family: Inter, system-ui, sans-serif;
     background: var(--bg);
@@ -57,9 +69,25 @@ body {
     gap: 12px;
 }
 
+.theme-toggle-button {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 999px;
+    padding: 12px 16px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 1rem;
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.theme-toggle-button:hover {
+    transform: translateY(-1px);
+    background: rgba(68, 120, 255, 0.12);
+}
+
 .tab-button {
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--card);
     border-radius: 999px;
     padding: 12px 18px;
     cursor: pointer;
@@ -74,12 +102,39 @@ body {
     border-color: var(--primary);
 }
 
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 .card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 24px;
     padding: 24px;
     box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(14px);
+    animation: fadeInUp 0.55s ease forwards;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.card:nth-of-type(2) {
+    animation-delay: 0.05s;
+}
+
+.card:nth-of-type(3) {
+    animation-delay: 0.1s;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .form-panel h2,
@@ -120,7 +175,7 @@ select {
     border-radius: 16px;
     padding: 14px 16px;
     font-size: 0.95rem;
-    background: #fafbff;
+    background: var(--card);
     color: var(--text);
 }
 
@@ -140,6 +195,14 @@ select:focus {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
     margin-top: 16px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }
 
 .hidden {
@@ -246,7 +309,7 @@ select:focus {
 .items-table tr:hover,
 .records-table tr:hover,
 .analysis-table tr:hover {
-    background: #fafbff;
+    background: rgba(68, 120, 255, 0.08);
 }
 
 .empty-row td {
@@ -290,7 +353,7 @@ select:focus {
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 10px 12px;
-    background: #fff;
+    background: var(--card);
     color: var(--text);
     font-size: 0.95rem;
 }
@@ -304,19 +367,23 @@ select:focus {
 
 .dashboard-panel {
     display: grid;
-    grid-template-columns: 1.4fr 0.8fr;
-    gap: 18px;
+    grid-template-columns: 1fr;
+    gap: 24px;
 }
 
 .chart-card {
-    min-height: 320px;
+    min-height: 640px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 28px;
+}
+
+.chart-card.chart-card--wide {
+    width: 100%;
 }
 
 .chart-placeholder {
-    min-height: 140px;
+    min-height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -328,10 +395,45 @@ select:focus {
 }
 
 .period-chart-card {
-    background: #f8fbff;
+    background: var(--card);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 18px;
+    padding: 24px;
+    min-height: 580px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.chart-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.legend-sales {
+    background: linear-gradient(180deg, var(--primary) 0%, #2f5ace 100%);
+}
+
+.legend-today {
+    background: linear-gradient(180deg, var(--success) 0%, #059669 100%);
 }
 
 .period-chart-header {
@@ -348,41 +450,265 @@ select:focus {
 }
 
 .bar-chart {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    min-height: 500px;
+    padding: 24px 20px 48px 60px;
+    overflow-x: hidden;
+    position: relative;
+    background: var(--card);
+    border-radius: 18px;
+    border: 1px solid rgba(66, 109, 255, 0.14);
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.bar-chart::before {
+    content: '';
+    position: absolute;
+    left: 60px;
+    top: 24px;
+    bottom: 48px;
+    width: 1px;
+    background: rgba(66, 109, 255, 0.18);
+    pointer-events: none;
+}
+
+.bar-chart::after {
+    content: '';
+    position: absolute;
+    left: 60px;
+    right: 20px;
+    bottom: 48px;
+    height: 1px;
+    background: rgba(66, 109, 255, 0.18);
+    pointer-events: none;
+}
+
+.chart-grid-lines {
+    position: absolute;
+    left: 60px;
+    top: 24px;
+    right: 20px;
+    bottom: 48px;
+    background-image: linear-gradient(to bottom, rgba(66, 109, 255, 0.08) 1px, transparent 1px);
+    background-size: 100% calc((100% - 0px) / 5);
+    pointer-events: none;
+}
+
+.chart-plot {
+    grid-column: 1 / -1;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    width: 100%;
+    min-height: 500px;
+}
+
+.chart-y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-right: 12px;
+    color: var(--muted);
+    font-size: 0.88rem;
+    position: relative;
+    z-index: 1;
+}
+
+.chart-axis-title {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+}
+
+.chart-y-axis span {
+    display: block;
+    line-height: 1.5;
+}
+
+.chart-columns {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
-    min-height: 220px;
-    padding: 12px 8px 4px;
+    gap: 16px;
     overflow-x: auto;
-    background: #fff;
-    border-radius: 16px;
-    border: 1px solid rgba(66, 109, 255, 0.12);
+    padding-bottom: 8px;
+    position: relative;
+    z-index: 1;
 }
 
 .bar-column {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
-    min-width: 32px;
-    width: 32px;
+    min-width: 64px;
+    width: 64px;
 }
 
 .bar-column .bar {
     width: 100%;
     background: linear-gradient(180deg, var(--primary) 0%, #2f5ace 100%);
     border-radius: 16px 16px 0 0;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, height 0.7s ease;
+    transform-origin: bottom;
 }
 
 .bar-column:hover .bar {
-    transform: translateY(-2px);
+    transform: translateY(-6px);
+    opacity: 0.92;
+}
+
+.chart-tooltip {
+    position: absolute;
+    z-index: 20;
+    min-width: 160px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(17, 24, 39, 0.95);
+    color: #fff;
+    font-size: 0.9rem;
+    pointer-events: none;
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.24);
+    transform: translate(-50%, -100%);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.chart-plot {
+    opacity: 0;
+    animation: fadeInUp 0.55s ease 0.1s forwards;
+}
+
+.chart-columns {
+    opacity: 0;
+    animation: fadeInUp 0.65s ease 0.15s forwards;
+}
+
+body {
+    animation: fadeInUp 0.55s ease forwards;
+}
+
+.bar-value {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    opacity: 0;
+    transition: opacity 0.15s ease, top 0.15s ease;
+    white-space: nowrap;
+}
+
+.bar-column:hover .bar-value {
+    opacity: 1;
+    top: -34px;
+}
+
+.bar-label {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+.bar-amount {
+    margin-top: 8px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.chart-x-axis {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+body.dark-mode .theme-toggle-button {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+body.dark-mode .bar-column .bar {
+    background: linear-gradient(180deg, var(--primary) 0%, #2e89ff 100%);
+}
+
+body.dark-mode .chart-tooltip {
+    background: rgba(15, 23, 42, 0.95);
+}
+
+body.dark-mode .tab-button,
+body.dark-mode .theme-toggle-button,
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode .secondary-button,
+body.dark-mode .secondary-button.danger,
+body.dark-mode .primary-button {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .primary-button {
+    background: var(--primary) !important;
+    color: #0d1117 !important;
+}
+
+body.dark-mode .secondary-button:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .secondary-button.danger:hover {
+    background: rgba(248, 81, 73, 0.12) !important;
+}
+
+body.dark-mode .tab-button.active {
+    background: var(--primary);
+    color: #0d1117;
+}
+
+body.dark-mode .header,
+body.dark-mode .card,
+body.dark-mode .period-chart-card {
+    background: var(--card);
+}
+
+body.dark-mode .dashboard-card,
+body.dark-mode .transaction-summary,
+body.dark-mode .records-panel,
+body.dark-mode .info-text {
+    color: #c9d1d9;
+}
+
+#payment-breakdown {
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.chart-tooltip.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.chart-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 .bar-column span {
     display: block;
     margin-top: 8px;
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     color: var(--muted);
     text-align: center;
     white-space: nowrap;
@@ -392,6 +718,32 @@ select:focus {
     margin-top: 4px;
     font-weight: 700;
     color: var(--text);
+}
+
+/* Highlight today's bar */
+.bar-column.today .bar {
+    background: linear-gradient(180deg, var(--success) 0%, #059669 100%);
+    box-shadow: 0 6px 18px rgba(5, 150, 105, 0.12);
+}
+
+/* Sparkline next to Today's card */
+.today-card-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.today-sparkline {
+    width: 120px;
+    height: 36px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.today-sparkline svg {
+    width: 100%;
+    height: 100%;
 }
 
 @media (max-width: 980px) {

@@ -67,4 +67,17 @@ https://<your-username>.github.io/StationaryDashboard
 - No build step is required; this is a plain static website.
 - The code already includes responsive mobile layout support.
 
+## Optional: Enable multi-user sync with Firebase
+
+To make transactions share between phones and show who is using the site, use Firebase Firestore.
+
+1. Create a Firebase project at https://console.firebase.google.com
+2. Add a Web app and copy the config values.
+3. Paste the config into `firebase-config.js` as `window.FIREBASE_CONFIG = { ... }`.
+4. The site will automatically initialize Firestore and start syncing records and presence.
+
+Notes:
+- If `firebase-config.js` is empty the site will continue to work with localStorage only.
+- Presence is implemented by updating a `users` collection document every ~25s; active users (last 5 minutes) are shown in the header.
+
 If you want, I can also help you create a GitHub Pages workflow or set up the repo automatically using Git commands.
