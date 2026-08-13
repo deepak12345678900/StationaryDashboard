@@ -45,8 +45,22 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+    align-items: center;
     gap: 16px;
     margin-bottom: 24px;
+}
+
+.user-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 220px;
+    margin-left: auto;
+}
+
+.user-area input {
+    max-width: 260px;
 }
 
 .brand {
@@ -747,6 +761,29 @@ body.dark-mode .info-text {
 }
 
 @media (max-width: 980px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .user-area {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .user-area input {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .tab-buttons {
+        width: 100%;
+    }
+
+    .tab-button {
+        flex: 1;
+    }
+
     .bar-chart {
         min-height: 200px;
         gap: 6px;
@@ -793,6 +830,11 @@ body.dark-mode .info-text {
         padding: 18px;
     }
 
+    .button-row,
+    .records-actions {
+        flex-direction: column;
+    }
+
     .primary-button,
     .secondary-button {
         width: 100%;
@@ -818,6 +860,15 @@ body.dark-mode .info-text {
     .brand h1 {
         font-size: 1.5rem;
     }
+
+    .tab-button {
+        min-width: 100%;
+    }
+
+    .dashboard-value {
+        font-size: 1.5rem;
+    }
+
 
     .form-panel h2,
     .transaction-summary h2,
