@@ -87,6 +87,18 @@ body.dark-mode .form-select {
     color: var(--bs-body-color);
 }
 
+.form-label {
+    color: var(--bs-body-color);
+}
+
+.form-control::placeholder {
+    color: var(--muted-color);
+}
+
+body.dark-mode .form-control::placeholder {
+    color: var(--muted-color);
+}
+
 /* Buttons */
 .btn-primary {
     background: var(--primary-color);
@@ -152,6 +164,15 @@ body.dark-mode .navbar {
     color: white;
     background: var(--primary-color);
     border-radius: 0.25rem;
+}
+
+/* Tab Content Visibility */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }
 
 /* Alert styling */
@@ -431,6 +452,22 @@ body.dark-mode .text-muted {
     color: var(--muted-color) !important;
 }
 
+body.dark-mode .text-center {
+    color: var(--bs-body-color);
+}
+
+body.dark-mode .card-title {
+    color: var(--bs-body-color);
+}
+
+body.dark-mode .fw-bold {
+    color: var(--bs-body-color);
+}
+
+body.dark-mode .small {
+    color: var(--muted-color);
+}
+
 body.dark-mode .alert-light {
     background: rgba(255, 255, 255, 0.05);
     color: var(--bs-body-color);
@@ -442,6 +479,11 @@ body.dark-mode .table-light {
 
 body.dark-mode .table tbody tr:hover {
     background: rgba(88, 166, 255, 0.08);
+}
+
+body.dark-mode select option {
+    background: var(--bs-card-bg);
+    color: var(--bs-body-color);
 }
 
 /* Hidden utility override */
