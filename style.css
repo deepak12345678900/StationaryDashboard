@@ -453,7 +453,7 @@ body.dark-mode .text-muted {
 }
 
 body.dark-mode .text-center {
-    color: var(--bs-body-color);
+    color: var(--muted-color) !important;
 }
 
 body.dark-mode .card-title {
@@ -475,10 +475,12 @@ body.dark-mode .alert-light {
 
 body.dark-mode .table-light {
     background: rgba(255, 255, 255, 0.02);
+    color:  rgb(255, 255, 255);
 }
 
 body.dark-mode .table tbody tr:hover {
     background: rgba(88, 166, 255, 0.08);
+    color: var(--muted-color);
 }
 
 body.dark-mode select option {
@@ -494,4 +496,4 @@ body.dark-mode select option {
     .bar-column span {
         font-size: 0.65rem;
     }
-}
+

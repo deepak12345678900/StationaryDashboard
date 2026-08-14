@@ -126,7 +126,7 @@ function renderCurrentItems() {
     elements.currentItemsBody.innerHTML = '';
 
     if (currentItems.length === 0) {
-        elements.currentItemsBody.innerHTML = '<tr class="empty-row"><td colspan="5">No items added yet.</td></tr>';
+        elements.currentItemsBody.innerHTML = '<tr><td class="table-light" colspan="5">No items added yet.</td></tr>';
         elements.itemCount.textContent = '0';
         elements.transactionTotal.textContent = formatCurrency(0);
         return;
@@ -298,7 +298,7 @@ function renderRecords() {
     elements.recordsBody.innerHTML = '';
 
     if (records.length === 0) {
-        elements.recordsBody.innerHTML = '<tr class="empty-row"><td colspan="6">No records available yet.</td></tr>';
+        elements.recordsBody.innerHTML = '<tr class="table-light"><td class= "table-light"colspan="6">No records available yet.</td></tr>';
         return;
     }
 
@@ -307,12 +307,12 @@ function renderRecords() {
         const itemsLabel = (record.items || []).map(item => `${item.name} (${item.quantity})`).join(', ');
         const createdBy = record.createdBy ? ` • ${record.createdBy}` : '';
         row.innerHTML = `
-            <td>${formatDate(record.createdAt)}${createdBy}</td>
-            <td>${itemsLabel}</td>
-            <td>${formatCurrency(record.total)}</td>
-            <td>${record.paymentMethod === 'split' ? 'Split' : record.paymentMethod}</td>
-            <td>${formatCurrency(record.cashAmount)}</td>
-            <td>${formatCurrency(record.gpayAmount)}</td>
+            <td class="table-light">${formatDate(record.createdAt)}${createdBy}</td>
+            <td class="table-light">${itemsLabel}</td>
+            <td class="table-light">${formatCurrency(record.total)}</td>
+            <td class="table-light">${record.paymentMethod === 'split' ? 'Split' : record.paymentMethod}</td>
+            <td class="table-light">${formatCurrency(record.cashAmount)}</td>
+            <td class="table-light">${formatCurrency(record.gpayAmount)}</td>
         `;
         elements.recordsBody.appendChild(row);
     });
@@ -390,10 +390,10 @@ function renderAnalysisTable(records) {
         const row = document.createElement('tr');
         const itemCount = record.items.reduce((sum, item) => sum + item.quantity, 0);
         row.innerHTML = `
-            <td>${formatDate(record.createdAt)}</td>
-            <td>${formatCurrency(record.total)}</td>
-            <td>${record.paymentMethod === 'split' ? 'Split' : record.paymentMethod}</td>
-            <td>${itemCount} items</td>
+            <td class = "table-light">${formatDate(record.createdAt)}</td>
+            <td class = "table-light">${formatCurrency(record.total)}</td>
+            <td class = "table-light">${record.paymentMethod === 'split' ? 'Split' : record.paymentMethod}</td>
+            <td class = "table-light">${itemCount} items</td>
         `;
         elements.analysisBody.appendChild(row);
     });
