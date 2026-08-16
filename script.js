@@ -115,7 +115,8 @@ window.toggleTheme = toggleTheme;
 
 function updatePaymentInputs() {
     const isSplit = elements.paymentMethod.value === 'split';
-    elements.splitFields.classList.toggle('hidden', !isSplit);
+    console.log(isSplit ? 'Split payment selected' : 'Single payment selected');
+    elements.splitFields.classList.toggle('d-none', !isSplit);
 }
 
 function calculateTransactionTotal() {
@@ -136,10 +137,11 @@ function renderCurrentItems() {
         const row = document.createElement('tr');
         const itemTotal = item.price * item.quantity;
         row.innerHTML = `
-            <td>${item.name}</td>
-            <td>${item.quantity}</td>
-            <td>${formatCurrency(item.price)}</td>
-            <td>${formatCurrency(itemTotal)}</td>
+            <td class="table-light">${item.name}</td>
+            <td class="table-light">${item.quantity}</td>
+            <td class="table-light">${item.quantity}</td>
+            <td class="table-light">${formatCurrency(item.price)}</td>
+            <td class="table-light">${formatCurrency(itemTotal)}</td>
             <td><button class="secondary-button" data-remove="${index}">Remove</button></td>
         `;
         elements.currentItemsBody.appendChild(row);
