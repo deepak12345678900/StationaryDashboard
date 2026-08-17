@@ -122,16 +122,8 @@ function loadProducts() {
             console.error('Failed to load products:', error);
         });
 }
-function formatChartCurrency(value) {
-    if (value >= 100000) {
-        return `₹${(value / 100000).toFixed(1)}L`;
-    }
-
-    if (value >= 1000) {
-        return `₹${(value / 1000).toFixed(1)}K`;
-    }
-
-    return `₹${Math.round(value)}`;
+function formatCurrency(value) {
+    return `₹${Number(value || 0).toFixed(2)}`;
 }
 
 function formatDate(timestamp) {
