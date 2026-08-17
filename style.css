@@ -1,4 +1,218 @@
 /* CSS Variables & Theme */
+.sales-chart-container {
+    width: 100%;
+}
+
+.chart-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.chart-stat {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--card-bg, #f8f9fa);
+}
+
+.chart-stat-label {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.65;
+    margin-bottom: 5px;
+}
+
+.chart-stat strong {
+    font-size: 1.05rem;
+}
+
+.sales-chart-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.sales-chart {
+    display: flex;
+    min-width: 700px;
+    height: 340px;
+    position: relative;
+}
+
+.chart-y-axis {
+    width: 75px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 5px 10px 45px 0;
+    font-size: 0.7rem;
+    opacity: 0.65;
+}
+
+.chart-plot-area {
+    position: relative;
+    flex: 1;
+    min-width: 600px;
+}
+
+.chart-grid {
+    position: absolute;
+    inset: 0 0 45px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.grid-line {
+    width: 100%;
+    border-top: 1px dashed rgba(128, 128, 128, 0.2);
+}
+
+.chart-bars {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    gap: 6px;
+}
+
+.chart-column {
+    position: relative;
+    flex: 1;
+    min-width: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    cursor: pointer;
+}
+
+.chart-bar {
+    width: min(22px, 70%);
+    min-height: 0;
+    border-radius: 7px 7px 3px 3px;
+    background: currentColor;
+    transition:
+        height 0.5s ease,
+        transform 0.2s ease,
+        opacity 0.2s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.chart-column:hover .chart-bar {
+    transform: scaleX(1.15);
+}
+
+.chart-column.today .chart-bar {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+.chart-column.best-day .chart-bar {
+    transform: scaleX(1.15);
+}
+
+.chart-value {
+    position: absolute;
+    bottom: calc(var(--bar-height, 0%) + 45px);
+    font-size: 0.65rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.chart-column:hover .chart-value,
+.chart-column.best-day .chart-value {
+    opacity: 0.8;
+}
+
+.chart-date {
+    position: absolute;
+    bottom: 20px;
+    font-size: 0.68rem;
+    white-space: nowrap;
+    transform: rotate(-35deg);
+    transform-origin: top right;
+}
+
+.chart-transactions {
+    position: absolute;
+    bottom: 0;
+    font-size: 0.6rem;
+    opacity: 0.5;
+    white-space: nowrap;
+}
+
+.chart-tooltip {
+    position: absolute;
+    z-index: 100;
+    pointer-events: none;
+    min-width: 160px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(20, 20, 20, 0.94);
+    color: white;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.chart-tooltip.hidden {
+    display: none;
+}
+
+.chart-tooltip.visible {
+    display: block;
+}
+
+.tooltip-date {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.tooltip-sales {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 3px 0;
+}
+
+.tooltip-meta {
+    font-size: 0.72rem;
+    opacity: 0.65;
+}
+
+.tooltip-badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.65rem;
+    opacity: 0.8;
+}
+
+.chart-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+
+    .chart-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-stat {
+        padding: 10px 12px;
+    }
+
+    .sales-chart {
+        min-width: 650px;
+    }
+}
+
 :root {
     --bs-body-bg: #f5f7fb;
     --bs-body-color: #1f2937;
@@ -205,42 +419,65 @@ body.dark-mode .alert-info {
 }
 
 /* Chart Styling */
-.bar-chart {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 16px;
-    min-height: 500px;
-    padding: 24px 20px 48px 60px;
-    overflow-x: hidden;
+.bar-column {
     position: relative;
-    background: var(--bs-card-bg);
-    border-radius: 0.5rem;
-    border: 1px solid rgba(68, 120, 255, 0.14);
-    transition: background 0.25s ease, border-color 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    min-width: 64px;
+    width: 64px;
+    height: 100%;
+    cursor: pointer;
 }
 
-.bar-chart::before {
-    content: '';
+.bar-label {
     position: absolute;
-    left: 60px;
-    top: 24px;
-    bottom: 48px;
-    width: 1px;
-    background: rgba(68, 120, 255, 0.18);
-    pointer-events: none;
+    bottom: 20px;
+    font-size: 0.75rem;
+    color: var(--muted-color);
+    text-align: center;
+    white-space: nowrap;
 }
 
-.bar-chart::after {
-    content: '';
+.bar-column.today::before {
+    content: 'TODAY';
     position: absolute;
-    left: 60px;
-    right: 20px;
-    bottom: 48px;
-    height: 1px;
-    background: rgba(68, 120, 255, 0.18);
-    pointer-events: none;
+    top: -55px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--success-color);
+    opacity: 0.9;
 }
 
+.bar-column.best-day .bar {
+    background: linear-gradient(
+        180deg,
+        #f59e0b,
+        #d97706
+    );
+}
+
+.bar-column.best-day::before {
+    content: 'BEST';
+    position: absolute;
+    top: -55px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    color: #f59e0b;
+}
+
+.bar-column .bar {
+    width: 70%;
+    margin: 0 auto;
+    border-radius: 10px 10px 3px 3px;
+}
+
+.bar-column:hover .bar {
+    transform: translateY(-4px) scaleX(1.04);
+    filter: brightness(1.08);
+}
 .chart-grid-lines {
     position: absolute;
     left: 60px;
@@ -323,17 +560,53 @@ body.dark-mode .alert-info {
     top: -28px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 700;
     color: var(--bs-body-color);
-    opacity: 0;
-    transition: opacity 0.15s ease, top 0.15s ease;
+    background: var(--bs-card-bg);
+    padding: 4px 7px;
+    border-radius: 6px;
     white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transform-origin: center;
+    transition:
+        opacity 0.15s ease,
+        top 0.15s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 5;
 }
 
 .bar-column:hover .bar-value {
     opacity: 1;
-    top: -34px;
+    visibility: visible;
+    top: -36px;
+}
+
+.bar-column.best-day .bar {
+    background: linear-gradient(
+        180deg,
+        var(--success-color) 0%,
+        #059669 100%
+    );
+
+    box-shadow:
+        0 8px 24px rgba(5, 150, 105, 0.2);
+}
+
+.bar-column.best-day::after {
+    content: 'BEST';
+    position: absolute;
+    top: -58px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 3px 6px;
+    border-radius: 5px;
+    background: var(--success-color);
+    color: white;
 }
 
 .bar-label {
@@ -344,9 +617,44 @@ body.dark-mode .alert-info {
 }
 
 .bar-amount {
-    margin-top: 8px;
+    margin-top: 100px;
     font-weight: 700;
     color: var(--bs-body-color);
+}
+
+.chart-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.chart-stat {
+    background: var(--bs-card-bg);
+    border: 1px solid rgba(128, 128, 128, 0.15);
+    border-radius: 14px;
+    padding: 16px 20px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.chart-stat:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.chart-stat-label {
+    display: block;
+    color: var(--muted-color);
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.chart-stat strong {
+    display: block;
+    color: var(--bs-body-color);
+    font-size: 1.25rem;
+    font-weight: 700;
 }
 
 .chart-x-axis {
@@ -417,9 +725,9 @@ body.dark-mode .alert-info {
     }
 
     .bar-column {
-        min-width: 48px;
-        width: 48px;
-    }
+    min-width: 64px;
+    width: 64px;
+}
 
     .chart-y-axis {
         font-size: 0.75rem;

@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'stationaryDashboardRecords';
 let currentItems = [];
+let productCatalog = [];
 
 // Firebase / multi-user state
 let useFirebase = false;
@@ -41,6 +42,27 @@ const elements = {
     tabButtons: document.querySelectorAll('.tab-button')
 };
 
+elements.productName.addEventListener('input', function () {
+
+    // Search entire catalog, display max 10
+    updateProductSuggestions(this.value);
+
+    // Auto-fill price when exact product is selected/typed
+    const enteredName = this.value.trim().toLowerCase();
+
+    const product = productCatalog.find(
+        product => product.nameLower === enteredName
+    );
+
+    if (product) {
+        elements.productPrice.value = product.price;
+    }
+});
+
+
+// Your other event listeners...
+elements.paymentMethod.addEventListener('change', updatePaymentInputs);
+
 function getClientId() {
     let id = window.localStorage.getItem('stationaryClientId');
     if (!id) {
@@ -77,8 +99,39 @@ function saveRecords(records) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
-function formatCurrency(value) {
-    return `₹${Number(value || 0).toFixed(2)}`;
+function loadProducts() {
+    if (!useFirebase || !db) {
+        productCatalog = [];
+        return;
+    }
+
+    db.collection('products')
+        .orderBy('nameLower')
+        .get()
+        .then(snapshot => {
+            productCatalog = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            console.log('Products loaded:', productCatalog);
+
+            updateProductSuggestions();
+        })
+        .catch(error => {
+            console.error('Failed to load products:', error);
+        });
+}
+function formatChartCurrency(value) {
+    if (value >= 100000) {
+        return `₹${(value / 100000).toFixed(1)}L`;
+    }
+
+    if (value >= 1000) {
+        return `₹${(value / 1000).toFixed(1)}K`;
+    }
+
+    return `₹${Math.round(value)}`;
 }
 
 function formatDate(timestamp) {
@@ -163,8 +216,9 @@ function clearTransactionForm() {
     renderCurrentItems();
 }
 
-function addItem(event) {
+async function addItem(event) {
     event.preventDefault();
+
     const name = elements.productName.value.trim();
     const price = Number(elements.productPrice.value);
     const quantity = Number(elements.productQuantity.value);
@@ -173,17 +227,29 @@ function addItem(event) {
         alert('Enter a product name before adding.');
         return;
     }
+
     if (!price || price <= 0) {
         alert('Enter a valid price greater than 0.');
         return;
     }
+
     if (!quantity || quantity < 1) {
         alert('Enter a valid quantity of at least 1.');
         return;
     }
 
-    currentItems.push({ name, price, quantity });
+    // Add item to current transaction
+    currentItems.push({
+        name,
+        price,
+        quantity
+    });
+
+    // Add product to Firestore if it doesn't exist
+    await saveProductToFirestore(name, price);
+
     renderCurrentItems();
+
     elements.productName.value = '';
     elements.productPrice.value = '';
     elements.productQuantity.value = '1';
@@ -279,6 +345,7 @@ function saveTransaction(event) {
             renderRecords();
             renderDashboard();
         });
+        loadProducts();
     } else {
         const records = getRecords();
         records.unshift(record);
@@ -287,6 +354,122 @@ function saveTransaction(event) {
         renderRecords();
         renderDashboard();
         alert('Transaction saved locally.');
+    }
+}
+
+function buildProductCatalogFromRecords() {
+    const productMap = new Map();
+
+    remoteRecordsCache.forEach(record => {
+        if (!Array.isArray(record.items)) {
+            return;
+        }
+
+        record.items.forEach(item => {
+            if (!item || !item.name) {
+                return;
+            }
+
+            const name = item.name.trim();
+
+            if (!name) {
+                return;
+            }
+
+            const nameLower = name.toLowerCase();
+
+            // Avoid duplicate products
+            if (!productMap.has(nameLower)) {
+                productMap.set(nameLower, {
+                    name: name,
+                    nameLower: nameLower,
+                    price: Number(item.price) || 0
+                });
+            }
+        });
+    });
+
+    productCatalog = Array.from(productMap.values());
+
+    console.log('Product catalog updated:', productCatalog);
+
+    updateProductSuggestions();
+}
+
+function updateProductSuggestions(searchText = '') {
+    const datalist = document.getElementById('product-suggestions');
+
+    if (!datalist) return;
+
+    datalist.innerHTML = '';
+
+    const query = searchText.trim().toLowerCase();
+
+    const matches = productCatalog
+        .filter(product => {
+            if (!query) return true;
+
+            return product.nameLower.includes(query);
+        })
+        .slice(0, 5);
+
+    matches.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.name;
+        datalist.appendChild(option);
+    });
+}
+
+elements.productName.addEventListener('change', function () {
+    const enteredName = this.value.trim().toLowerCase();
+
+    const product = productCatalog.find(
+        p => p.nameLower === enteredName
+    );
+
+    if (product) {
+        elements.productPrice.value = product.price;
+    }
+});
+
+
+async function saveProductToFirestore(name, price) {
+    if (!useFirebase || !db) {
+        return;
+    }
+
+    const nameLower = name.trim().toLowerCase();
+
+    // Check local cache first
+    const existingProduct = productCatalog.find(
+        product => product.nameLower === nameLower
+    );
+
+    if (existingProduct) {
+        return;
+    }
+
+    try {
+        const productData = {
+            name: name.trim(),
+            nameLower,
+            price: Number(price),
+            createdAt: new Date().toISOString()
+        };
+
+        const docRef = await db.collection('products').add(productData);
+
+        productCatalog.push({
+            id: docRef.id,
+            ...productData
+        });
+
+        updateProductSuggestions();
+
+        console.log('New product added:', name);
+
+    } catch (error) {
+        console.error('Failed to save product:', error);
     }
 }
 
@@ -403,28 +586,72 @@ function renderAnalysisTable(records) {
 
 function getDailySales(records, days) {
     const today = new Date();
+
+    // Start of today in local time
     today.setHours(0, 0, 0, 0);
+
     const dayList = [];
 
+    // Create the date buckets
     for (let index = days - 1; index >= 0; index -= 1) {
         const date = new Date(today);
+
         date.setDate(today.getDate() - index);
-        const key = date.toISOString().slice(0, 10);
-        dayList.push({ date, key, total: 0, transactions: 0, itemCount: 0 });
+
+        // IMPORTANT:
+        // Don't use toISOString() here because it converts to UTC.
+        const key =
+            `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+        dayList.push({
+            date,
+            key,
+            total: 0,
+            transactions: 0,
+            itemCount: 0
+        });
     }
 
-    const totalsByDate = dayList.reduce((acc, item) => {
-        acc[item.key] = item;
+    // Create quick lookup by date
+    const totalsByDate = dayList.reduce((acc, day) => {
+        acc[day.key] = day;
         return acc;
     }, {});
 
+    // Process transactions
     records.forEach(record => {
+        if (!record.createdAt) {
+            return;
+        }
+
         const recordDate = new Date(record.createdAt);
-        const key = recordDate.toISOString().slice(0, 10);
-        if (totalsByDate[key]) {
-            totalsByDate[key].total += record.total;
-            totalsByDate[key].transactions += 1;
-            totalsByDate[key].itemCount += (record.items || []).reduce((sum, item) => sum + item.quantity, 0);
+
+        if (Number.isNaN(recordDate.getTime())) {
+            return;
+        }
+
+        // Use LOCAL date instead of UTC date
+        const key =
+            `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}-${String(recordDate.getDate()).padStart(2, '0')}`;
+
+        const day = totalsByDate[key];
+
+        if (!day) {
+            return;
+        }
+
+        // Safely convert total to number
+        const total = Number(record.total) || 0;
+
+        day.total += total;
+        day.transactions += 1;
+
+        // Count total quantity of products sold
+        if (Array.isArray(record.items)) {
+            day.itemCount += record.items.reduce(
+                (sum, item) => sum + (Number(item.quantity) || 0),
+                0
+            );
         }
     });
 
@@ -434,107 +661,335 @@ function getDailySales(records, days) {
 function renderPeriodChart(records, period) {
     const days = period === 'monthly' ? 30 : 7;
     const dailySales = getDailySales(records, days);
-    const maxValue = Math.max(...dailySales.map(day => day.total), 10);
-    const tickCount = 5;
 
     elements.periodChart.innerHTML = '';
-    const tooltip = elements.chartTooltip;
+
     const todayKey = new Date().toISOString().slice(0, 10);
 
-    if (tooltip) {
-        tooltip.className = 'chart-tooltip hidden';
-        tooltip.innerHTML = '';
-    }
+    // ---------------------------------------------------------
+    // Calculate statistics
+    // ---------------------------------------------------------
 
-    const chartPlot = document.createElement('div');
-    chartPlot.className = 'chart-plot';
+    const totals = dailySales.map(day => Number(day.total) || 0);
+
+    const totalSales = totals.reduce((sum, value) => sum + value, 0);
+
+    const salesDays = dailySales.filter(day => day.total > 0);
+
+    const bestDay = salesDays.length
+        ? salesDays.reduce((best, day) =>
+            day.total > best.total ? day : best
+        )
+        : null;
+
+    const averageSales = salesDays.length
+        ? totalSales / salesDays.length
+        : 0;
+
+    const maxValue = Math.max(...totals, 1);
+
+    // ---------------------------------------------------------
+    // Container
+    // ---------------------------------------------------------
+
+    const container = document.createElement('div');
+    container.className = 'sales-chart-container';
+
+    // ---------------------------------------------------------
+    // Summary cards
+    // ---------------------------------------------------------
+
+    const summary = document.createElement('div');
+    summary.className = 'chart-summary';
+
+    summary.innerHTML = `
+        <div class="chart-stat">
+            <span class="chart-stat-label">Total Sales</span>
+            <strong>${formatCurrency(totalSales)}</strong>
+        </div>
+
+        <div class="chart-stat">
+            <span class="chart-stat-label">Average / Day</span>
+            <strong>${formatCurrency(averageSales)}</strong>
+        </div>
+
+        <div class="chart-stat">
+            <span class="chart-stat-label">Best Day</span>
+            <strong>
+                ${bestDay ? formatCurrency(bestDay.total) : '-'}
+            </strong>
+        </div>
+    `;
+
+    container.appendChild(summary);
+
+    // ---------------------------------------------------------
+    // Chart area
+    // ---------------------------------------------------------
+
+    const chartWrapper = document.createElement('div');
+    chartWrapper.className = 'sales-chart-wrapper';
+
+    const chart = document.createElement('div');
+    chart.className = 'sales-chart';
+
+    // ---------------------------------------------------------
+    // Y axis
+    // ---------------------------------------------------------
 
     const yAxis = document.createElement('div');
     yAxis.className = 'chart-y-axis';
-    const yAxisTitle = document.createElement('span');
-    yAxisTitle.className = 'chart-axis-title';
-    yAxisTitle.textContent = 'Price';
-    yAxis.appendChild(yAxisTitle);
-    for (let index = tickCount; index >= 0; index -= 1) {
-        const tickValue = Math.round((maxValue / tickCount) * index);
-        const tickLabel = document.createElement('span');
-        tickLabel.textContent = formatCurrency(tickValue);
-        yAxis.appendChild(tickLabel);
+
+    const tickCount = 5;
+
+    for (let i = tickCount; i >= 0; i--) {
+        const value = (maxValue / tickCount) * i;
+
+        const tick = document.createElement('span');
+
+        tick.textContent = formatCurrency(value);
+
+        yAxis.appendChild(tick);
     }
 
-    const columnsWrapper = document.createElement('div');
-    columnsWrapper.className = 'chart-columns';
+    chart.appendChild(yAxis);
 
-    dailySales.forEach(day => {
+    // ---------------------------------------------------------
+    // Plot
+    // ---------------------------------------------------------
+
+    const plot = document.createElement('div');
+    plot.className = 'chart-plot-area';
+
+    // Grid
+    const grid = document.createElement('div');
+    grid.className = 'chart-grid';
+
+    for (let i = 0; i <= tickCount; i++) {
+        const line = document.createElement('div');
+        line.className = 'grid-line';
+
+        grid.appendChild(line);
+    }
+
+    plot.appendChild(grid);
+
+    // ---------------------------------------------------------
+    // Bars
+    // ---------------------------------------------------------
+
+    const bars = document.createElement('div');
+    bars.className = 'chart-bars';
+
+    dailySales.forEach((day, index) => {
+
         const column = document.createElement('div');
-        column.className = 'bar-column';
-        const height = maxValue > 0 ? (day.total / maxValue) * 100 : 4;
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-        bar.style.height = '0%';
+        column.className = 'chart-column';
+
+        const value = Number(day.total) || 0;
+
+        const height = maxValue > 0
+            ? (value / maxValue) * 100
+            : 0;
+
+        // -----------------------------------------------------
+        // Determine important states
+        // -----------------------------------------------------
 
         if (day.key === todayKey) {
             column.classList.add('today');
         }
 
-        const hoverValue = document.createElement('span');
-        hoverValue.className = 'bar-value';
-        hoverValue.textContent = day.total > 0 ? formatCurrency(day.total) : '-';
-
-        const label = document.createElement('span');
-        label.className = 'bar-label';
-        label.textContent = day.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-
-        const amount = document.createElement('span');
-        amount.className = 'bar-amount';
-        amount.textContent = day.total > 0 ? formatCurrency(day.total) : '-';
-
-        column.appendChild(hoverValue);
-        column.appendChild(bar);
-        column.appendChild(label);
-        column.appendChild(amount);
-
-        requestAnimationFrame(() => {
-            bar.style.height = `${Math.max(height, 6)}%`;
-        });
-
-        if (tooltip) {
-            column.addEventListener('mouseenter', (event) => {
-                tooltip.innerHTML = `
-                    <strong>${label.textContent}</strong><br>
-                    ${day.total > 0 ? formatCurrency(day.total) : 'No sales'}<br>
-                    <span style="color:rgba(255,255,255,0.7);font-size:0.82rem;">${day.transactions} transaction${day.transactions === 1 ? '' : 's'} · ${day.itemCount} item${day.itemCount === 1 ? '' : 's'}</span>
-                `;
-                tooltip.className = 'chart-tooltip visible';
-                const rect = elements.periodChart.getBoundingClientRect();
-                tooltip.style.left = `${Math.min(Math.max(event.clientX - rect.left, 70), rect.width - 70)}px`;
-                tooltip.style.top = `${event.clientY - rect.top - 18}px`;
-            });
-            column.addEventListener('mousemove', (event) => {
-                const rect = elements.periodChart.getBoundingClientRect();
-                tooltip.style.left = `${event.clientX - rect.left}px`;
-                tooltip.style.top = `${event.clientY - rect.top - 12}px`;
-            });
-            column.addEventListener('mouseleave', () => {
-                tooltip.className = 'chart-tooltip hidden';
-            });
+        if (bestDay && day.key === bestDay.key) {
+            column.classList.add('best-day');
         }
 
-        columnsWrapper.appendChild(column);
+        if (value === 0) {
+            column.classList.add('no-sales');
+        }
+
+        // -----------------------------------------------------
+        // Value
+        // -----------------------------------------------------
+
+        const valueLabel = document.createElement('span');
+        valueLabel.className = 'chart-value';
+
+        valueLabel.textContent =
+            value > 0 ? formatCurrency(value) : '';
+
+        // -----------------------------------------------------
+        // Bar
+        // -----------------------------------------------------
+
+        const bar = document.createElement('div');
+        bar.className = 'chart-bar';
+
+        bar.style.height = '0%';
+
+        // -----------------------------------------------------
+        // Date
+        // -----------------------------------------------------
+
+        const dateLabel = document.createElement('span');
+        dateLabel.className = 'chart-date';
+
+        dateLabel.textContent =
+            day.date.toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric'
+            });
+
+        // -----------------------------------------------------
+        // Transaction count
+        // -----------------------------------------------------
+
+        const transactionLabel = document.createElement('span');
+        transactionLabel.className = 'chart-transactions';
+
+        transactionLabel.textContent =
+            day.transactions > 0
+                ? `${day.transactions} sale${day.transactions === 1 ? '' : 's'}`
+                : '';
+
+        column.appendChild(valueLabel);
+        column.appendChild(bar);
+        column.appendChild(dateLabel);
+        column.appendChild(transactionLabel);
+
+        // -----------------------------------------------------
+        // Animation
+        // -----------------------------------------------------
+
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                bar.style.height = `${Math.max(height, value > 0 ? 4 : 0)}%`;
+            }, index * 25);
+        });
+
+        // -----------------------------------------------------
+        // Tooltip
+        // -----------------------------------------------------
+
+        column.addEventListener('mouseenter', event => {
+
+            const tooltip = elements.chartTooltip;
+
+            if (!tooltip) return;
+
+            tooltip.innerHTML = `
+                <div class="tooltip-date">
+                    ${dateLabel.textContent}
+                </div>
+
+                <div class="tooltip-sales">
+                    ${value > 0 ? formatCurrency(value) : 'No sales'}
+                </div>
+
+                <div class="tooltip-meta">
+                    ${day.transactions}
+                    transaction${day.transactions === 1 ? '' : 's'}
+                    ·
+                    ${day.itemCount}
+                    item${day.itemCount === 1 ? '' : 's'}
+                </div>
+
+                ${
+                    day.key === todayKey
+                        ? '<div class="tooltip-badge">Today</div>'
+                        : ''
+                }
+
+                ${
+                    bestDay && day.key === bestDay.key
+                        ? '<div class="tooltip-badge">Best Day</div>'
+                        : ''
+                }
+            `;
+
+            tooltip.className = 'chart-tooltip visible';
+
+            const chartRect =
+                elements.periodChart.getBoundingClientRect();
+
+            const columnRect =
+                column.getBoundingClientRect();
+
+            const tooltipWidth = 170;
+
+            let left =
+                columnRect.left -
+                chartRect.left +
+                columnRect.width / 2 -
+                tooltipWidth / 2;
+
+            left = Math.max(
+                10,
+                Math.min(
+                    left,
+                    chartRect.width - tooltipWidth - 10
+                )
+            );
+
+            tooltip.style.left = `${left}px`;
+
+            tooltip.style.top =
+                `${columnRect.top - chartRect.top - 85}px`;
+        });
+
+        column.addEventListener('mouseleave', () => {
+
+            const tooltip = elements.chartTooltip;
+
+            if (!tooltip) return;
+
+            tooltip.className = 'chart-tooltip hidden';
+        });
+
+        bars.appendChild(column);
     });
 
-    const gridLines = document.createElement('div');
-    gridLines.className = 'chart-grid-lines';
-    chartPlot.appendChild(gridLines);
-    chartPlot.appendChild(yAxis);
-    chartPlot.appendChild(columnsWrapper);
+    plot.appendChild(bars);
 
-    const xAxis = document.createElement('div');
-    xAxis.className = 'chart-x-axis';
-    xAxis.textContent = 'Date';
-    chartPlot.appendChild(xAxis);
+    chart.appendChild(plot);
 
-    elements.periodChart.appendChild(chartPlot);
+    chartWrapper.appendChild(chart);
+
+    container.appendChild(chartWrapper);
+
+    // ---------------------------------------------------------
+    // Footer
+    // ---------------------------------------------------------
+
+    const footer = document.createElement('div');
+
+    footer.className = 'chart-footer';
+
+    footer.innerHTML = `
+        <span>
+            ${period === 'monthly' ? 'Last 30 days' : 'Last 7 days'}
+        </span>
+
+        ${
+            bestDay
+                ? `
+                    <span>
+                        Best:
+                        <strong>
+                            ${bestDay.date.toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric'
+                            })}
+                        </strong>
+                    </span>
+                `
+                : ''
+        }
+    `;
+
+    container.appendChild(footer);
+
+    elements.periodChart.appendChild(container);
 }
 
 // Firebase init and listeners
@@ -620,6 +1075,10 @@ function listenForRemoteRecords() {
         });
         remoteRecordsCache = records;
         firebaseRecordsLoaded = true;
+
+        // Build product suggestions from ALL historical records
+        buildProductCatalogFromRecords();
+
         renderRecords();
         renderDashboard();
     }, err => console.error('records listener error', err));
